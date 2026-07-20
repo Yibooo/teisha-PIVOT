@@ -95,6 +95,19 @@
   th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;}
   th{background:var(--band);color:#4a3f30;font-weight:600;}
 
+  /* FLAG / DATA TABLE */
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 8px;font-family:"Hiragino Kaku Gothic ProN",sans-serif;}
+  .legend .li{display:flex;align-items:center;gap:7px;font-size:13px;color:#4a3f30;}
+  .flag{display:inline-block;font-family:"Hiragino Kaku Gothic ProN",sans-serif;font-size:11.5px;font-weight:700;
+    padding:2px 8px;border-radius:6px;color:#fff;white-space:nowrap;letter-spacing:.02em;}
+  .f1{background:#0f5c4d}.f2{background:#2f6fb0}.f3{background:#a3541f}.f4{background:#6b6b6b}
+  h3.grp{font-size:16px;margin:24px 0 6px;padding-left:11px;border-left:4px solid var(--gold);}
+  table.data{font-size:13px;}
+  table.data th:nth-child(3),table.data td:nth-child(3){text-align:center;white-space:nowrap;}
+  table.data td .flag+.flag{margin-left:4px;}
+  .sumbox{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:20px 0;box-shadow:var(--shadow);}
+  .sumbox p{margin:9px 0;font-family:"Hiragino Kaku Gothic ProN",sans-serif;font-size:14.5px;}
+  .sumbox .flag{vertical-align:1px;margin-right:6px;}
   footer{padding:34px 0 50px;color:var(--sub);font-family:"Hiragino Kaku Gothic ProN",sans-serif;font-size:13px;}
   footer .disc{background:#f4f1ea;border:1px solid var(--line);border-radius:8px;padding:14px 16px;line-height:1.7;}
 
@@ -247,6 +260,112 @@
         <li>定借セミナー・個別Q&A運用（既存メニューを本件に最適化）</li>
         <li><b>反響→成約の歩留まりKPIで成果を可視化</b>／成果報酬型の提案も可能</li>
       </ul>
+    </div>
+  </section>
+
+  <section id="data">
+    <h2><span class="no">IMPLEMENTATION</span>実装に必要なデータと入手フラグ</h2>
+    <p class="muted">7つのProposalをWebサービス化するために必要なデータを、粒度と「入手のしやすさ」でフラグ分けしました。</p>
+    <div class="legend">
+      <span class="li"><span class="flag f1">1 既存</span>すでにある（≒定借ナビ保有）</span>
+      <span class="li"><span class="flag f2">2 取得可</span>公開データからスクレイピング可能</span>
+      <span class="li"><span class="flag f3">3 一次情報</span>自分たちで取りに行く必要あり</span>
+      <span class="li"><span class="flag f4">4 分類不可</span>生データでなく設計・入力値</span>
+    </div>
+
+    <h3 class="grp">0. 共通の土台（マスタ）</h3>
+    <div class="tblwrap"><table class="data">
+      <tr><th>データ項目</th><th>粒度</th><th>フラグ</th><th>主な取得元・メモ</th></tr>
+      <tr><td>物件マスタ（借地権種類・借地期間・残存・竣工・総戸数・権利形態・ブランド・事業主）</td><td>物件単位</td><td><span class="flag f1">1</span><span class="flag f2">2</span></td><td>既存50件は【1】／新規はSUUMO・公式。発売前の一等物件は事業主からの【3】</td></tr>
+      <tr><td>エリア×残存年数の成約単価</td><td>駅/町丁目×残存1年刻み×四半期</td><td><span class="flag f1">1</span></td><td>定借ナビの中核</td></tr>
+      <tr><td>賃料相場・所有権中古の成約</td><td>エリア×間取り×月次</td><td><span class="flag f2">2</span></td><td>SUUMO/LIFULL・国交省「不動産取引価格情報」。レインズは宅建業免許が必要</td></tr>
+      <tr><td>金融商品マスタ（金利・期間）</td><td>商品単位×月次</td><td><span class="flag f2">2</span></td><td>各行サイト</td></tr>
+      <tr><td>競合マスタの種</td><td>物件単位</td><td><span class="flag f1">1</span><span class="flag f2">2</span></td><td>手元PDF＋ポータルで拡充</td></tr>
+    </table></div>
+
+    <h3 class="grp">1. 定借「5大不安」払拭</h3>
+    <div class="tblwrap"><table class="data">
+      <tr><th>データ項目</th><th>粒度</th><th>フラグ</th><th>主な取得元・メモ</th></tr>
+      <tr><td>物件価格</td><td>住戸単位</td><td><span class="flag f1">1</span><span class="flag f2">2</span></td><td>手元価格表／ポータル</td></tr>
+      <tr><td>月額地代＋改定条項（間隔・指標・上限）</td><td>住戸単位＋年次</td><td><span class="flag f2">2</span><span class="flag f3">3</span></td><td>地代額はSUUMO・パンフ【2】／改定詳細は重要事項説明書【3】</td></tr>
+      <tr><td>解体準備金（月額・総額・返還条件）</td><td>住戸単位＋残存期間</td><td><span class="flag f3">3</span></td><td>重要事項説明書中心</td></tr>
+      <tr><td>保証金・前払地代</td><td>住戸単位</td><td><span class="flag f2">2</span></td><td>パンフ・ポータル</td></tr>
+      <tr><td>管理費・修繕積立金＋段階増額（長期修繕計画）</td><td>住戸単位＋年次</td><td><span class="flag f2">2</span><span class="flag f3">3</span></td><td>初期月額【2】／増額計画【3】</td></tr>
+      <tr><td>比較用・所有権物件の固都税</td><td>住戸/物件×年次</td><td><span class="flag f4">4</span></td><td>個別評価額は非公開→ルール【2】＋概算/課税明細【3】に分解</td></tr>
+      <tr><td>金利・ローン条件</td><td>商品単位×月次</td><td><span class="flag f2">2</span></td><td>各行公開</td></tr>
+      <tr><td>想定保有期間</td><td>ユーザー入力</td><td><span class="flag f4">4</span></td><td>入力値（収集対象でない）</td></tr>
+      <tr><td>残存年数別の成約単価（出口カーブ）</td><td>エリア×残存1年</td><td><span class="flag f1">1</span></td><td>定借ナビ</td></tr>
+      <tr><td>定借の中古成約事例</td><td>事例単位</td><td><span class="flag f2">2</span></td><td>国交省取引価格情報（残存の紐付けは自前加工）</td></tr>
+      <tr><td>定借対応の金融機関リスト＋実行事例</td><td>金融機関／事例単位</td><td><span class="flag f3">3</span></td><td>非公開。ヒアリング・自社実績</td></tr>
+    </table></div>
+
+    <h3 class="grp">2. 相続税評価メリット</h3>
+    <div class="tblwrap"><table class="data">
+      <tr><th>データ項目</th><th>粒度</th><th>フラグ</th><th>主な取得元・メモ</th></tr>
+      <tr><td>路線価</td><td>路線（住所）×年次</td><td><span class="flag f2">2</span></td><td>国税庁 財産評価基準書</td></tr>
+      <tr><td>借地権割合</td><td>路線単位</td><td><span class="flag f2">2</span></td><td>同上（記号A〜G）</td></tr>
+      <tr><td>定借の逓減率（複利現価率・基準年利率）</td><td>残存期間×時点</td><td><span class="flag f2">2</span></td><td>国税庁公表</td></tr>
+      <tr><td>建物の固定資産税評価額</td><td>住戸単位</td><td><span class="flag f3">3</span></td><td>個別非公開（課税明細 or 概算）</td></tr>
+      <tr><td>敷地権割合・持分</td><td>住戸単位</td><td><span class="flag f3">3</span></td><td>登記／重要事項（登記情報は有料・個別）</td></tr>
+      <tr><td>現金・他資産額</td><td>ユーザー入力</td><td><span class="flag f4">4</span></td><td>入力値</td></tr>
+      <tr><td>計算ロジック（税理士監修）</td><td>—</td><td><span class="flag f4">4</span></td><td>データでなく専門ノウハウ→監修を【3】的に確保</td></tr>
+    </table></div>
+
+    <h3 class="grp">3. 立地・歴史の希少性ストーリー</h3>
+    <div class="tblwrap"><table class="data">
+      <tr><th>データ項目</th><th>粒度</th><th>フラグ</th><th>主な取得元・メモ</th></tr>
+      <tr><td>歴史・文化資源（鴎外荘・舞姫 等）</td><td>地点単位＋出典</td><td><span class="flag f2">2</span><span class="flag f3">3</span></td><td>文献・自治体・Wikipedia【2】／現地取材【3】</td></tr>
+      <tr><td>周辺施設（距離・徒歩分）</td><td>施設単位</td><td><span class="flag f2">2</span></td><td>地図API・OSM・自治体オープンデータ</td></tr>
+      <tr><td>学区（通学区域）</td><td>町丁目単位</td><td><span class="flag f2">2</span></td><td>自治体オープンデータ</td></tr>
+      <tr><td>ハザード・地盤・標高</td><td>メッシュ/住所</td><td><span class="flag f2">2</span></td><td>国交省ハザードマップポータル 等</td></tr>
+      <tr><td>眺望（住戸単位の可視判定）</td><td>住戸単位（方位×階）</td><td><span class="flag f3">3</span></td><td>図面＋現地＋眺望シミュレーション＝自前</td></tr>
+      <tr><td>写真・地図素材</td><td>地点単位</td><td><span class="flag f2">2</span><span class="flag f3">3</span></td><td>地図【2】／現地写真【3】</td></tr>
+    </table></div>
+
+    <h3 class="grp">4. 住戸別・将来価値レポート</h3>
+    <div class="tblwrap"><table class="data">
+      <tr><th>データ項目</th><th>粒度</th><th>フラグ</th><th>主な取得元・メモ</th></tr>
+      <tr><td>エリア×残存年数の成約単価</td><td>駅/町丁目×残存1年</td><td><span class="flag f1">1</span></td><td>定借ナビ</td></tr>
+      <tr><td>対象住戸の属性（面積・間取り・階・向き）</td><td>住戸単位</td><td><span class="flag f1">1</span><span class="flag f2">2</span></td><td>手元図面／ポータル（眺望・角は3番参照）</td></tr>
+      <tr><td>補正係数（階・向き・眺望・角のプレミアム）</td><td>属性単位</td><td><span class="flag f4">4</span></td><td>生データでなく【1】の成約データから回帰で導出</td></tr>
+      <tr><td>賃料相場</td><td>エリア×間取り×月次</td><td><span class="flag f2">2</span></td><td>ポータル</td></tr>
+      <tr><td>新築比（新築時→現在の単価変化）</td><td>物件単位×時系列</td><td><span class="flag f1">1</span></td><td>定借ナビに列あり</td></tr>
+    </table></div>
+
+    <h3 class="grp">5. 多軸の競合比較</h3>
+    <div class="tblwrap"><table class="data">
+      <tr><th>データ項目</th><th>粒度</th><th>フラグ</th><th>主な取得元・メモ</th></tr>
+      <tr><td>競合物件マスタ（単価・管理費・共用施設・権利形態・残存 等）</td><td>物件単位</td><td><span class="flag f1">1</span><span class="flag f2">2</span></td><td>手元PDF＋ポータルで拡充</td></tr>
+      <tr><td>各軸のスコア化ルール（正規化基準）</td><td>軸単位</td><td><span class="flag f4">4</span></td><td>設計ロジック</td></tr>
+      <tr><td>生涯総支払額・相続税評価の軸</td><td>物件/住戸単位</td><td><span class="flag f1">1</span><span class="flag f2">2</span><span class="flag f3">3</span></td><td>カテゴリ1・2のフラグを継承</td></tr>
+    </table></div>
+
+    <h3 class="grp">6. ターゲット別シミュレーション</h3>
+    <div class="tblwrap"><table class="data">
+      <tr><th>データ項目</th><th>粒度</th><th>フラグ</th><th>主な取得元・メモ</th></tr>
+      <tr><td>ペルソナ定義</td><td>セグメント単位</td><td><span class="flag f4">4</span></td><td>仮説設計→反響データで裏付け</td></tr>
+      <tr><td>セグメント別の重視軸ウェイト</td><td>セグメント×軸</td><td><span class="flag f4">4</span></td><td>チューニング設計</td></tr>
+      <tr><td>反響顧客データ（属性・決め手・失注理由）</td><td>来場/問合せ単位</td><td><span class="flag f3">3</span></td><td>自社CRMの一次データ（ゼロから蓄積）</td></tr>
+      <tr><td>投資前提値（賃料・空室率・経費率）</td><td>エリア×間取り</td><td><span class="flag f2">2</span></td><td>相場・公表統計</td></tr>
+      <tr><td>出し分けロジック</td><td>—</td><td><span class="flag f4">4</span></td><td>ロジック（データでない）</td></tr>
+    </table></div>
+
+    <h3 class="grp">7. 販売プロセスの仕組み・KPI</h3>
+    <div class="tblwrap"><table class="data">
+      <tr><th>データ項目</th><th>粒度</th><th>フラグ</th><th>主な取得元・メモ</th></tr>
+      <tr><td>診断LPの入力データ</td><td>見込み客単位</td><td><span class="flag f3">3</span></td><td>これから自社で集める一次データ</td></tr>
+      <tr><td>ファネルKPI</td><td>イベント×日次</td><td><span class="flag f3">3</span></td><td>GA4等で自社計測</td></tr>
+      <tr><td>流入チャネル</td><td>チャネル単位</td><td><span class="flag f2">2</span><span class="flag f3">3</span></td><td>標準計測ツール（自社一次だが定型）</td></tr>
+      <tr><td>MRツール利用ログ</td><td>商談単位</td><td><span class="flag f3">3</span></td><td>自社</td></tr>
+      <tr><td>成果報酬の算定基礎（契約実績）</td><td>契約単位</td><td><span class="flag f3">3</span></td><td>自社一次</td></tr>
+    </table></div>
+
+    <h3 class="grp">まとめ：フラグ別の全体像</h3>
+    <div class="sumbox">
+      <p><span class="flag f1">1 既存</span>エリア×残存の成約単価／新築比／定借物件マスタ／競合PDFの種。<b>最大の武器。ここを軸に据える。</b></p>
+      <p><span class="flag f2">2 取得可</span>路線価・借地権割合・逓減率（国税庁）／賃料・取引価格／金利／地図・ハザード・学区。<b>初期に自動収集パイプラインを構築する対象。</b></p>
+      <p><span class="flag f3">3 一次情報</span>地代改定・解体準備金・長期修繕（重要事項説明書）／定借対応ローン（金融機関ヒアリング）／敷地権割合（登記）／眺望判定／反響・KPI（自社計測）。<b>差別化の源泉であり、最も労力がかかるボトルネック。</b></p>
+      <p><span class="flag f4">4 分類不可</span>補正係数・スコア化ルール・出し分けロジック・ペルソナ。<b>収集でなく「設計・分析」タスクとして別管理。</b></p>
     </div>
   </section>
 
