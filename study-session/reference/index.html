@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自社版 定借ナビ ─ 残存年数別 資産価値グラフ</title>
+<style>
+  :root{--ink:#0f172a;--sub:#64748b;--line:#e2e8f0;--bg:#f8fafc;--green:#059669;--card:#fff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;font-size:14px}
+  header{background:#fff;border-bottom:1px solid var(--line)}
+  header .in{max-width:1120px;margin:0 auto;padding:14px 20px;font-weight:700;font-size:18px}
+  .band{background:var(--green);color:#fff;font-size:12px;font-weight:700}
+  .band .in{max-width:1120px;margin:0 auto;padding:8px 20px}
+  main{max-width:1120px;margin:0 auto;padding:28px 20px 60px}
+  h1{font-size:26px;margin:0 0 6px}
+  .lead{color:var(--sub);margin:0 0 18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:18px}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  button{font:inherit;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer}
+  button.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+  button.ghost{color:var(--sub)}
+  .status{color:var(--sub);font-size:12px;margin-top:8px}
+  .err{color:#b91c1c;font-size:13px;margin-top:8px;white-space:pre-line}
+  label.f{font-weight:600;font-size:13px}
+  select{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px}
+  .seg{display:inline-flex;background:#f1f5f9;border:1px solid var(--line);border-radius:9px;padding:2px}
+  .seg button{border:0;background:transparent;border-radius:7px;padding:6px 12px;color:var(--sub)}
+  .seg button.on{background:#fff;color:var(--ink);font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+  .seg small{color:#94a3b8;margin-left:4px}
+  h2{font-size:16px;margin:0 0 4px}
+  .note{color:#94a3b8;font-size:12px;margin:0 0 10px}
+  .chartbox{position:relative;height:300px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:9px 8px;border-bottom:1px solid #f1f5f9;text-align:left}
+  th{background:#f8fafc;color:var(--sub);font-weight:600}
+  td a{color:#1d4ed8;cursor:pointer;text-decoration:underline}
+  .badge{display:inline-block;padding:2px 8px;border-radius:6px;font-weight:700;border:1px solid}
+  .b-g{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+  .b-y{background:#fffbeb;color:#b45309;border-color:#fde68a}
+  .b-r{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+  .stats{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0 12px}
+  .stat{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+  .stat b{display:block;font-size:18px}
+  .help{background:#eff6ff;border:1px solid #dbeafe;color:#1e40af;border-radius:12px;padding:14px 18px;font-size:13px;line-height:1.8}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<header><div class="in">自社版 定借ナビ</div></header>
+<div class="band"><div class="in">🔒 データはこのPCのブラウザの中だけで処理され、外部には送信されません</div></div>
+<main>
+  <section id="listView">
+    <h1>残存年数別 資産価値グラフ</h1>
+    <p class="lead">定期借地権マンションの成約価格をもとにした、残存年数別の資産価値推移です。</p>
+
+    <div class="card">
+      <div class="row">
+        <button class="primary" id="btnNew">新築データを読み込む</button>
+        <button class="primary" id="btnOld">中古データを読み込む</button>
+        <button id="btnSample">サンプルデータで試す</button>
+        <button class="ghost" id="tplNew">テンプレートCSV（新築）</button>
+        <button class="ghost" id="tplOld">テンプレートCSV（中古）</button>
+        <input type="file" id="fileNew" accept=".csv" class="hidden">
+        <input type="file" id="fileOld" accept=".csv" class="hidden">
+      </div>
+      <div class="status" id="status">まだデータが読み込まれていません。</div>
+      <div class="err" id="err"></div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <label class="f" for="ward">エリア</label>
+        <select id="ward"><option value="all">全体</option></select>
+        <label class="f" style="margin-left:12px">駅徒歩</label>
+        <div class="seg" id="walk"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>新築時価格を100%とした場合の価格比率</h2>
+      <p class="note">100%超 ＝ 新築時より値上がり。横軸は成約時点の残存年数（5年刻み）。</p>
+      <div class="chartbox"><canvas id="chartRatio"></canvas></div>
+      <h2 style="margin-top:22px">残存年数別 坪単価（万円/坪）</h2>
+      <p class="note">● は各物件の新築時坪単価。サンプル数が少ない年数帯は参考値です。</p>
+      <div class="chartbox"><canvas id="chartTsubo"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h2 id="listTitle">対象物件一覧</h2>
+      <table>
+        <thead><tr><th>マンション名</th><th>区</th><th>竣工</th><th>借地期限</th><th>残存年数</th><th>総戸数</th><th>最寄駅</th><th>新築比</th><th>データ</th></tr></thead>
+        <tbody id="tbody"><tr><td colspan="9" style="color:#94a3b8">データを読み込むと表示されます</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="help">
+      <b>📈 グラフの見方</b><br>
+      ・新築比 ＝ 中古の成約坪単価 ÷ その物件の新築時の坪単価（100%を超えると新築時より高く売れている）<br>
+      ・坪単価（万円/坪）＝ 価格（万円）÷ 専有面積（㎡）× 3.30578<br>
+      ・残存年数 ＝ 借地期限年 − 成約年
+    </div>
+  </section>
+
+  <section id="detailView" class="hidden">
+    <button id="btnBack">← 一覧に戻る</button>
+    <h1 id="dTitle" style="margin-top:14px"></h1>
+    <p class="lead" id="dSub"></p>
+    <div class="stats" id="dStats"></div>
+    <div class="card">
+      <h2>残存年数別 坪単価の推移（成約価格・1年刻み）</h2>
+      <p class="note">点線は新築時の坪単価です。</p>
+      <div class="chartbox"><canvas id="chartDetail"></canvas></div>
+    </div>
+  </section>
+</main>
+<script src="lib/chart.umd.min.js"></script>
+<script src="lib/papaparse.min.js"></script>
+<script src="sample-data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

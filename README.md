@@ -22,8 +22,16 @@
 | パス | 内容 |
 |---|---|
 | [PIVOT.md](PIVOT.md) | ビジネスモデル変更の要点（最新） |
+| [study-session/](study-session/) | **勉強会教材**「AIで 自社版 定借ナビ をつくる」（スライド・プロンプト集・完成見本） |
 | [ekoda-pj/](ekoda-pj/) | クレヴィア江古田 ─ 新モデルの**事例**（駅徒歩フィルター・駅距離別の資産性） |
 | `index.html` | リビオ上野池之端 7カテゴリ提案記事（旧モデル時点・アーカイブ） |
+
+## 🎓 勉強会教材（AI内製化）
+
+AI・Claude・GitHub 未経験の方が、スライドどおりに進めて自社データで定借ナビ型のツールを作れる教材です。
+
+- スライド（PDF）：https://yibooo.github.io/teisha-PIVOT/study-session/slides.pdf
+- プロンプト集：[study-session/prompts.md](study-session/prompts.md)
 
 ## 📄 記事（GitHub Pages）
 
